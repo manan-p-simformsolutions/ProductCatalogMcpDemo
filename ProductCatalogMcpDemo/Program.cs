@@ -1,5 +1,5 @@
 using ModelContextProtocol.Protocol;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using ProductCatalogMcpDemo.Services;
 using ProductCatalogMcpDemo.Tools;
 
