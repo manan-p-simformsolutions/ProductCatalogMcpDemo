@@ -6,7 +6,7 @@ Sample ASP.NET Core app that exposes the same in-memory product catalog through 
 
 ## Prerequisites
 
-- **.NET SDK:** This repo pins a minimum SDK in [`global.json`](global.json) (currently **9.0.311**). The `rollForward` policy allows newer feature bands (for example .NET 10 SDK) as long as they can build `net9.0` projects. If `dotnet` reports an SDK resolution error, install the [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0) or a newer supported SDK.
+- **.NET SDK 10:** This repo pins a minimum SDK in [`global.json`](global.json) (currently **10.0.103**). The project targets `net10.0`. If `dotnet` reports an SDK resolution error, install the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) or a newer supported SDK (`rollForward` allows newer feature bands).
 - **Optional:** [Node.js](https://nodejs.org/) only if you use [MCP Inspector](#optional-mcp-inspector) instead of your editor’s built-in MCP client.
 
 ## Clone, restore, and run
@@ -178,9 +178,9 @@ Keep documentation (including blog posts) aligned with this table.
 
 | Item | Version |
 |------|---------|
-| **Pinned SDK (minimum)** | 9.0.311 (see [`global.json`](global.json); `rollForward` applies) |
-| **Target framework** | `net9.0` |
-| **Microsoft.AspNetCore.OpenApi** | 9.0.0 |
-| **ModelContextProtocol.AspNetCore** | 1.2.0 |
-| **Swashbuckle.AspNetCore** | 7.2.0 |
+| **Pinned SDK (minimum)** | 10.0.103 (see [`global.json`](global.json); `rollForward` applies) |
+| **Target framework** | `net10.0` |
+| **Microsoft.AspNetCore.OpenApi** | 10.0.10 |
+| **ModelContextProtocol.AspNetCore** | 1.4.1 |
+| **Swashbuckle.AspNetCore** | 10.2.3 |
 | **MCP server name / version (runtime)** | ProductCatalogMCP / 1.0.0 |
