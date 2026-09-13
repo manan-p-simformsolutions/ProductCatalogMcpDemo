@@ -16,27 +16,27 @@ public sealed class ProductCatalogTools
     public ProductCatalogTools(IProductService products)
         => _productsService = products;
 
-    [McpServerTool, Description("Search the product catalog by keyword.")]
+    [McpServerTool, Description("Search the product catalog by product name or keyword. Returns up to 50 matching products.")]
     public async Task<IEnumerable<Product>> SearchProductsAsync(
-        [Description("Keyword to search for in name, description, or SKU.")] string keyword,
-        [Description("Maximum number of results to return (default 10).")] int maxResults = 10,
+        [Description("Search text to match against product name, description, or SKU. Required, 1 to 80 characters.")] string keyword,
+        [Description("How many products to return. Integer from 1 to 50. Default is 10.")] int maxResults = 10,
         CancellationToken cancellationToken = default)
     {
         var list = await _productsService.SearchAsync(keyword, maxResults, cancellationToken).ConfigureAwait(false);
         return list;
     }
 
-    [McpServerTool, Description("Retrieve full details for a product by its ID.")]
+    [McpServerTool, Description("Retrieve a product by its catalog id. Returns id, SKU, name, description, and price.")]
     public async Task<Product?> GetProductByIdAsync(
-        [Description("The unique product identifier (integer).")] int productId,
+        [Description("The product id from the catalog. A positive integer, for example 1.")] int productId,
         CancellationToken cancellationToken = default)
     {
         return await _productsService.GetByIdAsync(productId, cancellationToken).ConfigureAwait(false);
     }
 
-    [McpServerTool, Description("Check available stock for a product SKU.")]
+    [McpServerTool, Description("Check available stock for a product SKU. Returns quantity and warehouse code.")]
     public async Task<InventoryStatus> CheckInventoryAsync(
-        [Description("The SKU code of the product to check.")] string sku,
+        [Description("The product SKU to look up, for example SKU-MOUSE-001.")] string sku,
         CancellationToken cancellationToken = default)
     {
         return await _productsService.GetInventoryStatusAsync(sku, cancellationToken).ConfigureAwait(false);

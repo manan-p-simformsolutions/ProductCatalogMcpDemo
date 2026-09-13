@@ -4,6 +4,8 @@ namespace ProductCatalogMcpDemo.Services;
 
 /// <summary>
 /// In-memory catalog for the blog demo (replace with your API or database).
+/// CancellationToken is here so the same call chain is ready for
+/// production I/O such as FindAsync or HttpClient.GetAsync.
 /// </summary>
 public sealed class ProductService : IProductService
 {
@@ -57,20 +59,35 @@ public sealed class ProductService : IProductService
         },
     };
 
+    private const int MaxKeywordLength = 80;
+    private const int MaxSkuLength = 32;
+
     public Task<IReadOnlyList<Product>> SearchAsync(string keyword, int maxResults, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         if (string.IsNullOrWhiteSpace(keyword))
         {
-            return Task.FromResult<IReadOnlyList<Product>>([]);
+            throw new ArgumentException("Keyword is required.", nameof(keyword));
         }
 
         var k = keyword.Trim();
+        if (k.Length > MaxKeywordLength)
+        {
+            throw new ArgumentException("Keyword must be 80 characters or fewer.", nameof(keyword));
+        }
+
+        if (maxResults is < 1 or > 50)
+        {
+            throw new ArgumentOutOfRangeException(nameof(maxResults), "maxResults must be between 1 and 50.");
+        }
+
         var matches = Products
             .Where(p =>
                 p.Name.Contains(k, StringComparison.OrdinalIgnoreCase) ||
                 p.Description.Contains(k, StringComparison.OrdinalIgnoreCase) ||
                 p.Sku.Contains(k, StringComparison.OrdinalIgnoreCase))
-            .Take(Math.Max(1, Math.Min(maxResults, 50)))
+            .Take(maxResults)
             .ToList();
 
         return Task.FromResult<IReadOnlyList<Product>>(matches);
@@ -78,30 +95,39 @@ public sealed class ProductService : IProductService
 
     public Task<Product?> GetByIdAsync(int productId, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (productId < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(productId), "productId must be a positive integer.");
+        }
+
         var product = Products.FirstOrDefault(p => p.Id == productId);
         return Task.FromResult(product);
     }
 
     public Task<InventoryStatus> GetInventoryStatusAsync(string sku, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         if (string.IsNullOrWhiteSpace(sku))
         {
-            return Task.FromResult(new InventoryStatus
-            {
-                Sku = "(empty)",
-                AvailableQuantity = 0,
-                WarehouseCode = "N/A",
-            });
+            throw new ArgumentException("SKU is required.", nameof(sku));
         }
 
-        if (Inventory.TryGetValue(sku.Trim(), out var status))
+        var s = sku.Trim();
+        if (s.Length > MaxSkuLength)
+        {
+            throw new ArgumentException("SKU must be 32 characters or fewer.", nameof(sku));
+        }
+
+        if (Inventory.TryGetValue(s, out var status))
         {
             return Task.FromResult(status);
         }
 
         return Task.FromResult(new InventoryStatus
         {
-            Sku = sku.Trim(),
+            Sku = s,
             AvailableQuantity = 0,
             WarehouseCode = "UNKNOWN",
         });
