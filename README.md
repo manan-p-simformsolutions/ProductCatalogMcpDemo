@@ -16,7 +16,10 @@ git clone https://github.com/manan-p-simformsolutions/ProductCatalogMcpDemo.git
 cd ProductCatalogMcpDemo
 dotnet restore
 dotnet run --project ProductCatalogMcpDemo/ProductCatalogMcpDemo.csproj
+dotnet test ProductCatalogMcpDemo.Tests/ProductCatalogMcpDemo.Tests.csproj
 ```
+
+`dotnet test` runs the six `ProductService` unit tests (search, get-by-id, empty keyword, `maxResults` out of range, non-positive id, empty SKU).
 
 By default the **http** profile listens on **http://localhost:5010** (see `ProductCatalogMcpDemo/Properties/launchSettings.json`). The **https** profile also binds **https://localhost:7249**.
 
@@ -56,7 +59,7 @@ Open [http://localhost:5010/swagger](http://localhost:5010/swagger) in a browser
 
 ### Search products
 
-`GET /api/products?q={keyword}&max={1-50}` — `max` defaults to **10** if omitted or invalid. If `q` is missing or empty, the service returns an empty list (**200** with `[]`).
+`GET /api/products?q={keyword}&max={1-50}` — `max` defaults to **10** only when it is omitted. An empty or missing `q`, or a `max` outside **1–50**, returns **400** with the validation message (for example `Keyword is required.` or `maxResults must be between 1 and 50.`).
 
 **Example (curl):**
 
@@ -84,13 +87,15 @@ Invoke-RestMethod "http://localhost:5010/api/products?q=mouse&max=5" | ConvertTo
 ]
 ```
 
-**Empty search:**
+**Empty search (HTTP 400):**
 
 ```bash
-curl -s "http://localhost:5010/api/products?q="
+curl -s -w "\nHTTP_CODE:%{http_code}\n" "http://localhost:5010/api/products?q="
 ```
 
-**Expected:** `[]`
+**Expected:** **400**. The body is the validation message, `Keyword is required. (Parameter 'keyword')`.
+
+**Invalid max (HTTP 400):** `GET /api/products?q=mouse&max=0` or `max=51` → **400**, with `maxResults must be between 1 and 50.` in the body.
 
 ### Get product by ID
 
