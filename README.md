@@ -146,19 +146,32 @@ The server exposes MCP at **`POST /mcp`** using **streamable HTTP** (`WithHttpTr
 Configure MCP in your editor, keep the app on port **5010**, then use natural language in chat (for example “Get product details for id **3**”). **GitHub Copilot Chat** (or another MCP-aware agent in your IDE) selects the catalog tool and returns the same fields you see in Swagger for that product.
 
 1. **Start the API** (same command as in [Clone, restore, and run](#clone-restore-and-run)) so **`http://localhost:5010/mcp`** is available.
-2. **Register the MCP server** by adding a URL transport entry. Minimal configuration:
+2. **Register the MCP server.** VS Code and Cursor use different files. VS Code requires `"type": "http"`.
+
+**VS Code** (user or workspace `mcp.json`; see [Add and manage MCP servers in VS Code](https://code.visualstudio.com/docs/copilot/customization/mcp-servers) and the [MCP configuration reference](https://code.visualstudio.com/docs/copilot/reference/mcp-configuration)):
 
 ```json
 {
   "servers": {
     "product-catalog-mcp": {
+      "type": "http",
       "url": "http://localhost:5010/mcp"
     }
   }
 }
 ```
 
-Put this in your editor’s MCP configuration (**VS Code:** user or workspace `mcp.json`—see [Add and manage MCP servers in VS Code](https://code.visualstudio.com/docs/copilot/customization/mcp-servers) and the [MCP configuration reference](https://code.visualstudio.com/docs/copilot/reference/mcp-configuration); **Cursor:** follow Cursor’s MCP docs if the root key differs, often `mcpServers`). For VS Code HTTP servers you may also specify `"type": "http"` next to `"url"` if IntelliSense suggests it.
+**Cursor** (`.cursor/mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "product-catalog-mcp": {
+      "url": "http://localhost:5010/mcp"
+    }
+  }
+}
+```
 
 3. **Confirm the connection** in the MCP UI: the **product-catalog-mcp** server should show as running and report **three tools** (search, product by id, inventory).
 4. **Chat:** Ask for catalog data in plain language (for example “Find the product with id **1**” or “Get product details for id **3**”). You should see a tool run (for example **`get_product_by_id`**) and a reply with **id**, **sku**, **name**, **description**, and **price** consistent with [`ProductService`](ProductCatalogMcpDemo/Services/ProductService.cs).
